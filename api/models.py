@@ -1,10 +1,25 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import IntegrityError
 import uuid
 import datetime
 
 db = SQLAlchemy()
 
-class Customer(db.Model):
+
+class ModelClass():
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+    def add(self):
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except IntegrityError as e:
+            print(f"Error processing new add")
+            raise ValueError(e)
+        
+
+class Customer(db.Model, ModelClass):
     __tablename__="customer"
     
     id = db.Column(db.Integer, primary_key=True) 
@@ -27,10 +42,6 @@ class Customer(db.Model):
            dicti["bookings"] = self.bookings
            return dicti
         
-    def add(self):
-        db.session.add(self)
-        db.session.commit()
-        
     def update(self, name, last_name, email,plate):
         if name != '':
             print(f"Updating {self.id} name {self.name} to {name}")
@@ -44,7 +55,7 @@ class Customer(db.Model):
         db.session.flush()
         db.session.commit()
         
-class Booking(db.Model):
+class Booking(db.Model, ModelClass):
     __tablename__="booking"
     
     id = db.Column(db.Integer, primary_key=True) 
@@ -56,10 +67,3 @@ class Booking(db.Model):
         format = "%Y-%m-%dT%H:%M:%S.000Z"
         dt_object = datetime.datetime.strptime(date, format)
         self.date = dt_object
-        
-    def as_dict(self):
-        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
-    
-    def add(self):
-        db.session.add(self)
-        db.session.commit()
