@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from models import *
+from api.models import *
 from flask import Flask
 from flask_cors import CORS, cross_origin
 

@@ -1,5 +1,5 @@
 from flask import Blueprint, request, Response
-from models import *
+from api.models import *
 import json
 
 customer_blueprint=Blueprint("customer", __name__)

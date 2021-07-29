@@ -1,2 +1,8 @@
+# 
+env
+#
 api/__pycache__
 api/data/data.db
+#
+frontend/dist
+frontend/__pycache__
