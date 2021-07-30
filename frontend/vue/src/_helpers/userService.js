@@ -1,5 +1,5 @@
 import axios from 'axios'
-export function configureFakeBackend() {
+export function configureUserPool() {
     var users = [];
     axios
         .get('http://localhost:8080/customer/all')
@@ -30,9 +30,7 @@ export function configureFakeBackend() {
                         let user = filteredUsers[0];
                         let responseJson = {
                             id: user.id,
-                            username: user.username,
-                            firstName: user.firstName,
-                            lastName: user.lastName
+                            username: user.email,
                         };
                         resolve({ ok: true, text: () => Promise.resolve(JSON.stringify(responseJson)) });
                     } else {

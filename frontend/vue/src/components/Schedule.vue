@@ -14,7 +14,7 @@
       <span id="renderRange" class="render-range"></span>
     <span style="margin-left:20px;"><button id="commit" class="btn btn-dark" type="button" disabled>Commit to this booking</button></span>
     </div>
-    <div id="calendar"></div>
+    <div id="calendar" style="top:400px;"></div>
   </div>
 
 </template>

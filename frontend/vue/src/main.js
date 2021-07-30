@@ -2,9 +2,9 @@ import Vue from 'vue'
 import './js/jquery-import'
 import App from './App'
 import { router } from './_helpers/router'
-import { configureFakeBackend } from "./_helpers/fake-backend";
+import { configureUserPool } from "./_helpers/userService";
 
-configureFakeBackend();
+configureUserPool();
 Vue.config.productionTip = false
 
 /* eslint-disable no-new */
