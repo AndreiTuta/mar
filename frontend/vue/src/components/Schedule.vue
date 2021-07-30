@@ -1,5 +1,5 @@
-<template>
-  <div>
+<template >
+  <div :key="componentKey">
   <input type="hidden" id="customer" :value=this.$route.params.id>
    <div id="menu">
       <span id="menu-navi">
@@ -12,7 +12,7 @@
         </button>
       </span>
       <span id="renderRange" class="render-range"></span>
-    <span style="margin-left:20px;"><button id="commit" class="btn btn-dark" type="button" disabled>Commit to this booking</button></span>
+    <span style="margin-left:20px;"><button id="commit" class="btn btn-dark" type="button" v-on:click="componentKey++" disabled>Commit to this booking</button></span>
     </div>
     <div id="calendar" style="top:400px;"></div>
   </div>
@@ -40,9 +40,11 @@ export default {
 
   methods: {
       forceRerender(){
-        this.$forceUpdate();
+        this.componentKey += 1;  
       }
-  },
+  },data() {
+      return{ componentKey: 0};
+    },
 
   mounted: function () {   
    var guid = '';
@@ -394,9 +396,6 @@ export default {
       function getDataAction(target) {
           return target.dataset ? target.dataset.action : target.getAttribute('data-action');
       }
-      /*resizeThrottled = tui.util.throttle(function() {
-          cal.render();
-      }, 50);*/
       window.cal = cal;
       setRenderRangeText();
       setSchedules();
@@ -406,7 +405,10 @@ export default {
         var start = ScheduleList[0].start._date;
         console.log(start.toISOString());
         var customer = $("input#customer").val();
-         $.post("http://localhost:8080/booking/new?customer="+customer+"&date="+start.toISOString()).done(function(data, success){console.log("added"); location.reload();});
+         $.post("http://localhost:8080/booking/new?customer="+customer+"&date="+start.toISOString()).done(function(data, success){
+            console.log("added");
+            window.location.href = "/confirmation"
+            });
     });
     }
 }
