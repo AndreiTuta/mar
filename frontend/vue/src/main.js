@@ -1,15 +1,10 @@
 import Vue from 'vue'
 import './js/jquery-import'
-import App from './App'
-import { router } from './_helpers/router'
-import { configureUserPool } from "./_helpers/userService";
+import App from "./App";
 
-configureUserPool();
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
-/* eslint-disable no-new */
 new Vue({
-  el: '#app',
-  router,
+  components: { App },
   render: h => h(App)
-})
+}).$mount("#app");

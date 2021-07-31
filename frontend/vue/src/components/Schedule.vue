@@ -1,7 +1,6 @@
 <template >
   <div :key="componentKey">
-  <input type="hidden" id="customer" :value=this.$route.params.id>
-   <div id="menu">
+   <div id="menu"></div>
       <span id="menu-navi">
         <button type="button" class="btn btn-default btn-sm move-today" data-action="move-today">Today</button>
         <button type="button" class="btn btn-default btn-sm move-day" data-action="move-prev">

@@ -1,13 +1,14 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
-    <router-view/>
+    <schedule></schedule>
   </div>
 </template>
 
 <script>
+import Schedule from './components/Schedule'
 export default {
-  name: 'app'
+  name: 'app',components: {Schedule
+  },
 }
 </script>
 
