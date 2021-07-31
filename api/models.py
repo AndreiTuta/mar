@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
 from sqlalchemy.exc import IntegrityError
 import uuid
 import datetime
@@ -20,7 +21,7 @@ class ModelClass():
             raise ValueError(e)
 
 
-class Customer(db.Model, ModelClass):
+class Customer(db.Model, ModelClass, UserMixin):
     __tablename__ = "customer"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -55,6 +56,16 @@ class Customer(db.Model, ModelClass):
             self.email = email
         db.session.flush()
         db.session.commit()
+        
+    def get_id(self):
+        try:
+            return self.id
+        except AttributeError:
+            raise NotImplementedError("No `id` attribute - override `get_id`")
+
+    def __repr__(self):
+        return "User(%s , %s)" % (self.uname, self.email)
+
 
 
 class Booking(db.Model, ModelClass):
