@@ -1,0 +1,35 @@
+<nav class="navbar is-warning" role="navigation" aria-label="main navigation">
+    <div class="navbar-brand">
+        <a class="navbar-item" href="{{ url_for('frontend.homepage') }}">
+            <div class="column is-one-fourth title has-text-white">
+                MAR
+            </div>
+        </a>
+    </div>
+
+    <div id="navbarBasicExample" class="navbar-menu">
+        <div class="navbar-end">
+            <div class="navbar-item">
+                <div class="buttons">
+                    <a class="button is-white" href="{{ url_for('frontend.homepage') }}">
+                        <strong class="has-text-dark">Home</strong> {% if current_user.is_authenticated %}
+                        <a class="button is-dark" href="{{ url_for('frontend.gallerypage') }}">
+                            <strong>Gallery</strong>
+                        </a>
+                        <a class="button is-dark" href="{{ url_for('frontend.calendarpage') }}">
+                            <strong>Calendar</strong>
+                        </a>
+                        <a class="button is-dark" href="{{ url_for('frontend.logoutpage') }}">
+                            <strong>Logout</strong>
+                        </a>
+                        {% else %}
+                    </a>
+                    <a class="button is-warning" href="{{ url_for('frontend.loginpage') }}">
+                        <strong>Login</strong>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

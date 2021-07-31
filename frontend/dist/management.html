@@ -1,0 +1,801 @@
+{% extends 'index.html' %} {% macro render_vouchers(campaign)%} {% set id = campaign.id %}
+{% set vouchers = campaign.vouchers %}
+
+<div class="columns">
+    <button type="button" class="button is-success add-voucher" data-campaign="{{id}}" data-exp="{{campaign.end}}"
+        {{ 'disabled' if not campaign.started else ''}}><i class="fas fa-plus" style="margin-right:5px;"></i> Add a new
+        voucher for this campaign</button>
+</div>
+<div class="columns" style="margin-top: 20px;">
+
+    <table id="voucherTable" class="table is-striped">
+
+        <thead>
+            <th style="display:hidden">Id</th>
+            <th>Code</th>
+            <th>Created</th>
+            <th>Ends</th>
+            <th>Valid</th>
+            <th>
+                <!-- Buttons -->
+            </th>
+        </thead>
+        <tbody>
+            {% for voucher in vouchers %}
+            <tr>
+                <td id="voucherId" style="display:hidden">{{voucher.id}}</td>
+                <td>{{voucher.code}}</td>
+                <td>{{voucher.created}}</td>
+                <td>{{voucher.redeem_end}}</td>
+                <td>
+                    {% if voucher.valid %}
+                    <i class="fas fa-check" style="margin-right:5px;"></i> usable {% else %}
+                    <i class="fas fa-times" style="margin-right:5px;"></i>invalid {% endif%}
+
+                </td>
+                <td><button type="button" id="send{{voucher.id}}" class="send-voucher button is-warning"
+                        {{ 'disabled' if not voucher.send else ''}}><i class="fas fa-paper-plane"></i></button>
+                    <button type="button" id="refresh{{voucher.id}}" class="refresh-voucher button is-info"
+                        {{ 'disabled' if not voucher.refresh else ''}}><i class="fas fa-sync"></i></button>
+                    <button type="button" id="expire{{voucher.id}}" class="expire-voucher button is-danger"
+                        {{ 'disabled' if not voucher.expire else ''}}><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>
+            {%endfor%}
+        </tbody>
+    </table>
+
+</div>
+
+{% endmacro %} {% macro render_campaign(campaign)%}
+<h3>{{campaign.name}}</h3>
+<div>
+    <div class="tabs is-toggle is-fullwidth" id="tabs">
+        <ul>
+            <li data-tab="1">
+                <a>
+                    <span class="icon is-small"><i class="fas fa-calendar"></i></i></span>
+                    <span>Dates</span>
+                </a>
+            </li>
+            <li data-tab="2">
+                <a>
+                    <span class="icon is-small"><i class="fa fa-wallet"></i></span>
+                    <span>Dicount</span>
+                </a>
+            </li>
+            <li data-tab="3">
+                <a>
+                    <span class="icon is-small"><i class="fa fa-lock-open"></i></span>
+                    <span>Conditions</span>
+                </a>
+            </li>
+            <li data-tab="4">
+                <a>
+                    <span class="icon is-small"><i class="fa fa-ticket-alt"></i></span>
+                    <span>Vouchers</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div id="tab-content" style="display:none;height:100px;">
+        <input type="hidden" id="campaignId" value="{{campaign.id}}">
+        <section class="dates" data-content="1">
+            <div class="columns">
+                <div class="column is-half">Start date</div>
+                <div class="column is-half"><input type="hidden" id="startDate{{campaign.id}}"
+                        value="{{campaign.start}}"><input type="text" id="startDP{{campaign.id}}"
+                        class="input is-rounded datepicker">
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column is-half">End date</div>
+                <div class="column is-half"><input type="hidden" id="endDate{{campaign.id}}"
+                        value="{{campaign.end}}"><input type="text" id="endDP{{campaign.id}}"
+                        class="input is-rounded datepicker"></div>
+            </div>
+            <div class="columns">
+                <div class="column"><button type="button" class="update-button" data-type="dates"
+                        data-id="{{campaign.id}}" id="update_campaign_{{campaign.id}}_dates">Update
+                        dates</button></div>
+            </div>
+        </section>
+        <section data-content="2">
+            <div class="columns">
+                <div class="column is-third">Discount</div>
+                <input type="hidden" id="campaign_{{campaign.id}}_discount_id" value="{{campaign.discount.id}}">
+                <input type="hidden" id="campaign_{{campaign.id}}_discount_type"
+                    value="{{campaign.discount.discount_type}}">
+                <div class="column is-third"><select name="campaign_{{campaign.id}}_discount_type"
+                        id="campaign_{{campaign.id}}_discount_type" class="discount_select">
+                        <option value="fixed">Fixed</option>
+                        <option value="percent">Percentage</option>
+                    </select>
+                </div>
+                <div class="column is-third"><input type="text" class="input is-rounded discount_val"
+                        id="campaign_{{campaign.id}}_discount_value" value="{{campaign.discount.discount_value}}"></div>
+            </div>
+            <div class="columns">
+                <div class="column"><button type="button" class="update-button" data-type="discount"
+                        data-id="{{campaign.id}}" id="update_campaign_{{campaign.id}}_discount">Update
+                        discount</button></div>
+            </div>
+        </section>
+        <section data-content="3">
+            {% set constraints = campaign.constraints %} {% set sum_constraint = constraints[1] %}
+            <div>
+                <input type="hidden" name="campaign_{{campaign.id}}_sum_enabled"
+                    id="campaign_{{campaign.id}}_sum_enabled" value="{{sum_constraint.id}}">
+                <input type="hidden" name="campaign_{{campaign.id}}_sum_type" id="campaign_{{campaign.id}}_sum_type"
+                    value="{{sum_constraint.mode}}">
+                <input type="hidden" name="campaign_{{campaign.id}}_sum_val" id="campaign_{{campaign.id}}_sum_val"
+                    value="{{sum_constraint.value}}">
+                <div class="columns">
+                    <div class="column is-one-fifth">
+                        <input type="checkbox" name="campaign_{{campaign.id}}_sum_checkbox"
+                            id="campaign_{{campaign.id}}_sum_checkbox">
+                    </div>
+                    <div class="column">
+                        <h3>Sum constraint</h3>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column is-third">Customer must spend</div>
+                    <div class="column is-third"><select name="campaign_{{campaign.id}}_sum_constraint_mode"
+                            id="campaign_{{campaign.id}}_sum_constraint_mode"
+                            class="campaign_{{campaign.id}}_sum_constraint_mode">
+                            <option value="more">more</option>
+                            <option value="less">less</option>
+                        </select>
+                    </div>
+                    <div class="column is-third">than <input type="text" class="input is-rounded sum_constraint_value"
+                            id="campaign_{{campaign.id}}_sum_constraint_value" value=""></div>
+
+                </div>
+            </div>
+            <div>
+                {% set age_constraint = constraints[2] %}
+                <input type="hidden" name="campaign_{{campaign.id}}_age_enabled"
+                    id="campaign_{{campaign.id}}_age_enabled" value="{{age_constraint.id}}">
+                <input type="hidden" name="campaign_{{campaign.id}}_age_type" id="campaign_{{campaign.id}}_age_type"
+                    value="{{age_constraint.mode}}">
+                <input type="hidden" name="campaign_{{campaign.id}}_age_val" id="campaign_{{campaign.id}}_age_val"
+                    value="{{age_constraint.value}}">
+                <div class="columns">
+                    <div class="column is-one-fifth">
+                        <input type="checkbox" name="campaign_{{campaign.id}}_age_checkbox"
+                            id="campaign_{{campaign.id}}_age_checkbox">
+                    </div>
+                    <div class="column">
+                        <h3>Age constraint</h3>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column is-third">Customer must have</div>
+                    <div class="column is-third"><select name="campaign_{{campaign.id}}_age_constraint_mode"
+                            id="campaign_{{campaign.id}}_age_constraint_mode"
+                            class="campaign_{{campaign.id}}_age_constraint_mode">
+                            <option value="more">more</option>
+                            <option value="less">less</option>
+                        </select>
+                    </div>
+                    <div class="column is-third">than <input type="text" class="input is-rounded age_constraint_value"
+                            id="campaign_{{campaign.id}}_age_constraint_value" value=""> years with the company</div>
+                </div>
+            </div>
+            <div>
+                {% set car_constraint = constraints[3] %}
+                <input type="hidden" name="campaign_{{campaign.id}}_age_enabled"
+                    id="campaign_{{campaign.id}}_car_enabled" value="{{car_constraint.id}}">
+                <input type="hidden" name="campaign_{{campaign.id}}_car_type" id="campaign_{{campaign.id}}_car_type"
+                    value="{{car_constraint.mode}}">
+                <input type="hidden" name="campaign_{{campaign.id}}_car_val" id="campaign_{{campaign.id}}_car_val"
+                    value="{{car_constraint.value}}">
+                <div class="columns">
+                    <div class="column is-one-fifth">
+                        <input type="checkbox" name="campaign_{{campaign.id}}_car_checkbox"
+                            id="campaign_{{campaign.id}}_car_checkbox">
+                    </div>
+                    <div class="column">
+                        <h3>Car constraint</h3>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column is-third">Customer car must be</div>
+                    <div class="column is-third"><select name="campaign_{{campaign.id}}_car_constraint_mode"
+                            id="campaign_{{campaign.id}}_car_constraint_mode"
+                            class="campaign_{{campaign.id}}_car_constraint_mode">
+                            <option value="equal">equal</option>
+                        </select>
+                    </div>
+                    <div class="column is-third">to <input type="text" class="input is-rounded car_constraint_value"
+                            id="campaign_{{campaign.id}}_car_constraint_value" value=""></div>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column"><button type="button" class="update-button" data-type="constraint"
+                        data-id="{{campaign.id}}" id="update_campaign_{{campaign.id}}_constraintrs">Update
+                        constraints</button></div>
+            </div>
+        </section>
+        <section data-content="4">{{render_vouchers(campaign)}}</section>
+    </div>
+</div>
+{% endmacro %} {% macro render_modal()%}
+<div class="modal" id="newCampaignModal">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+        <div class="card" id="campaignInfo">
+            <div class="card-content">
+                <div class="columns">
+                    <div class="column is-half">Name</div>
+                    <div class="column is-half"><input type="text" id="nameNewCampaign" class="input is-rounded"></div>
+                </div>
+                <div class="columns">
+                    <div class="column is-half">Start date</div>
+                    <div class="column is-half"><input type="text" id="startNewCampaign"
+                            class="input is-rounded datepicker">
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column is-half">End date</div>
+                    <div class="column is-half"><input type="text" id="endNewCampaign"
+                            class="input is-rounded datepicker"></div>
+                </div>
+            </div>
+            <footer class="card-footer">
+                <button id="submitCampaignInfo">Submit</button>
+            </footer>
+        </div>
+        <div class="card" id="campaignDiscount" style="display: none;">
+            <div class="card-content">
+                <div class="columns">
+                    <div class="column is-third">Discount</div>
+                    <div class="column is-third"><select id="newCampaignDiscountType" class="discount_select">
+                            <option value="fixed">Fixed</option>
+                            <option value="percent">Percentage</option>
+                        </select>
+                    </div>
+                    <div class="column is-third"><input type="text" class="input is-rounded discount_val"
+                            id="newCampaignDiscountValue">
+                    </div>
+                </div>
+            </div>
+            <footer class="card-footer">
+                <button id="submitCampaignDiscount">Submit</button>
+            </footer>
+        </div>
+    </div>
+    <div class="card" id="campaignConstraints" style="display: none;">
+        <div class="card-content">
+            <div>
+                <div class="columns">
+
+                    <div class="column is-one-fifth">
+                        <input type="checkbox" name="campaign_new_sum_checkbox" id="campaign_new_sum_checkbox">
+                    </div>
+                    <div class="column">
+                        <h3>Sum constraint</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="columns">
+                <div class="column is-third">Customer must spend</div>
+                <div class="column is-third"><select name="campaign_new_sum_constraint_mode"
+                        id="campaign_new_sum_constraint_mode" class="campaign_new_sum_constraint_mode">
+                        <option value="more">more</option>
+                        <option value="less">less</option>
+                    </select>
+                </div>
+                <div class="column is-third">than <input type="text" class="input is-rounded sum_constraint_value"
+                        id="campaign_new_sum_constraint_value" value=""></div>
+
+            </div>
+            <div>
+                <div class="columns">
+                    <div class="column is-one-fifth">
+                        <input type="checkbox" name="campaign_new_age_checkbox" id="campaign_new_age_checkbox">
+                    </div>
+                    <div class="column">
+                        <h3>Age constraint</h3>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column is-third">Customer must have</div>
+                    <div class="column is-third"><select name="campaign_new_age_constraint_mode"
+                            id="campaign_new_age_constraint_mode" class="campaign_new_age_constraint_mode">
+                            <option value="more">more</option>
+                            <option value="less">less</option>
+                        </select>
+                    </div>
+                    <div class="column is-third">than <input type="text" class="input is-rounded age_constraint_value"
+                            id="campaign_new_age_constraint_value" value=""> years with the company</div>
+                </div>
+            </div>
+            <div>
+                <div class="columns">
+                    <div class="column is-one-fifth">
+                        <input type="checkbox" name="campaign_new_car_checkbox" id="campaign_new_car_checkbox">
+                    </div>
+                    <div class="column">
+                        <h3>Car constraint</h3>
+                    </div>
+                </div>
+                <div class="columns">
+                    <div class="column is-third">Customer car must be</div>
+                    <div class="column is-third"><select name="campaign_new_car_constraint_mode"
+                            id="campaign_new_car_constraint_mode" class="campaign_new_car_constraint_mode">
+                            <option value="equal">equal</option>
+                        </select>
+                    </div>
+                    <div class="column is-third">to <input type="text" class="input is-rounded car_constraint_value"
+                            id="campaign_new_car_constraint_value" value=""> </div>
+                </div>
+            </div>
+            <footer class="card-footer">
+                <button id="submitCampaignConstraints">Submit</button>
+            </footer>
+        </div>
+    </div>
+    <div class="card" id="campaignConfirmation" style="display: none;">
+        <div class="card-content">
+            <div class="columns">
+                <div class="column is-half">Your campaign has been saved!</div>
+            </div>
+        </div>
+        <footer class="card-footer">
+            <button class="modal-close is-large" aria-label="close" id="closeModal"></button>
+        </footer>
+    </div>
+</div>
+{% endmacro %} {% block body %}
+
+<div style="margin-top: 20px;margin-left:20px;margin-right:20px;">
+    Management page
+
+    <div id="campaigns">
+        <div class="columns">
+            <div class="column is-half">
+                <h3>Campaigns</h3>
+            </div>
+            <div class="column is-half"><button type="button" class="button is-success" id="newCampaignBtn"> <i
+                        class="fas fa-plus" style="margin-right:5px;"></i> Add a new campaign</button></div>
+            {{render_modal()}}
+        </div>
+        {% if campaigns|length > 0%}
+        <div id="accordion">
+            {% for campaign in campaigns %} {{render_campaign(campaign)}} {% endfor %}
+        </div>
+        {%else%}
+        <h3>There are no campaigns yet. Use the button above to add a new one</h3>
+        {%endif%}
+    </div>
+</div>
+</div>
+<script>
+    function create_campaign_discount(id, type, value) {
+        var url = "{{url_for('discount.index',_external=True, _scheme='https')}}"
+        $.ajax({
+            url,
+            type: "POST",
+            data: {
+                "type": type,
+                "value": value,
+                "campaign": id
+            }
+        }).done(function (response) {
+            console.log(response);
+            console.log("campaign discount submitted." + type, value);
+            $("div#campaignDiscount").css('display', 'none');
+            $("div#campaignConstraints").css('display', 'block');
+        }).fail(function (response) {
+            console.log(response)
+        });
+    }
+
+    function create_car_constraint(campaign_id, type, value) {
+        var url =
+            "{{url_for('constraint.create_camp_constr',_external=True, _scheme='https', campaign_id = campaign_id)}}" +
+            campaign_id + "?constraint=3&mode=" + type + "&value=" + value
+        $.ajax({
+            url,
+            type: "POST",
+        }).done(function (response) {
+            console.log(response);
+        }).fail(function (response) {
+            console.log(response)
+        });
+    }
+
+    function create_age_constraint(campaign_id, type, value) {
+        var url =
+            "{{url_for('constraint.create_camp_constr',_external=True, _scheme='https', campaign_id = campaign_id)}}" +
+            campaign_id + "?constraint=2&mode=" + type + "&value=" + value
+        $.post(url).done(function (response) {
+            console.log(response);
+        }).fail(function (response) {
+            console.log(response)
+        });
+    }
+
+    function create_sum_constraint(campaign_id, type, value) {
+        var url =
+            "{{url_for('constraint.create_camp_constr',_external=True, _scheme='https', campaign_id = campaign_id)}}" +
+            campaign_id + "?constraint=1&mode=" + type + "&value=" + value
+        $.post(url).done(function (response) {
+            console.log(response);
+        }).fail(function (response) {
+            console.log(response)
+        });
+    }
+
+
+    function update_constraint(id, type, value) {
+        var url =
+            "{{url_for('constraint.update_campaign_constraint',_external=True, _scheme='https', const_id = id)}}" + +
+            id + "?mode=" + type + "&value=" + value;
+        $.ajax({
+            url: url,
+            type: 'PUT'
+        }).done(function (response) {
+            console.log(response);
+        }).fail(function (response) {
+            console.log(response)
+        });
+    }
+
+    function remove_constraint(id) {
+        var url =
+            "{{url_for('constraint.remove_campaign_constraint',_external=True, _scheme='https', const_id = id)}}" + id;
+        $.ajax({
+            url: url,
+            type: 'DELETE'
+        }).done(function (response) {
+            console.log(response);
+        }).fail(function (response) {
+            console.log(response)
+        });
+    }
+
+    function update_campaign(id, start, end) {
+        var url = "{{url_for('campaign.update_campaign',_external=True, _scheme='https', id = id)}}" + id + "?start=" +
+            start + "&end=" + end
+        $.ajax({
+            url: url,
+            type: 'PUT'
+        }).done(function (response) {
+            console.log(response);
+        }).fail(function (response) {
+            console.log(response)
+        });
+    }
+
+    function update_campaign_discount(id, type, value) {
+        var url = "{{url_for('discount.update_campaign_discount',_external=True, _scheme='https', id = id)}}" + id +
+            "?type=" + type + "&value=" + value;
+        $.ajax({
+            url: url,
+            type: 'PUT',
+        }).done(function (response) {
+            console.log(response);
+        }).fail(function (response) {
+            console.log(response)
+        });
+    }
+
+    function add_new_campaign_voucher(campaign_id) {
+        var url =
+            "{{url_for('voucher.create_camp_voucher',_external=True, _scheme='https', campaign_id = campaign_id)}}" +
+            campaign_id + "?valid=True"
+        $.post(url).done(function (response) {
+            console.log(response);
+        }).fail(function (response) {
+            console.log(response)
+        });
+    }
+
+    function update_voucher(voucher_id, valid, end, new_voucher) {
+        var url = "{{url_for('voucher.update_voucher_route',_external=True, _scheme='https', id = voucher_id)}}" +
+            voucher_id + "?valid=" + valid + "&end=" + end + "&new=" + new_voucher
+        $.ajax({
+            url: url,
+            type: 'PUT'
+        }).done(function (response) {
+            console.log(response);
+        }).fail(function (response) {
+            console.log(response)
+        });
+    }
+
+
+    $(function () {
+        $("#accordion").accordion({
+            collapsible: true,
+            active: false,
+            heightStyle: "content"
+        });
+        $(".datepicker").datepicker({
+            "dateFormat": "yy-mm-dd",
+            "minDate": 0
+        });
+        $("table#voucherTable").dataTable({
+            paginate: false,
+            info: false
+        });
+    });
+
+    $(document).ready(function () {
+        $('#tabs li').on('click', function () {
+            var tab = $(this).data('tab');
+
+            $('#tabs li').removeClass('is-active');
+            $(this).addClass('is-active');
+
+            $('#tab-content section').removeClass('is-active');
+            // get the id of the selected campaign
+            var target = $('section[data-content="' + tab + '"]');
+            $(target).addClass('is-active');
+            // show tabs content
+            $("div#tab-content").css('display', 'block');
+            $("div#tab-content").css("height", "400px");
+        });
+        // set vals
+        $.each($("div#tab-content"), function (i, val) {
+            var id = ($(val).children("input#campaignId").val());
+            $("input#startDP" + id).val($("input#startDate" + id).val());
+            $("input#endDP" + id).val($("input#endDate" + id).val());
+            $("select#campaign_" + id + "_discount_type option").each(function () {
+                if ($(this).val() == $("input#campaign_" + id + "_discount_type").val()) {
+                    $(this).prop("selected", true);
+                }
+            });
+            $("select#campaign_" + id + "_sum_constraint_mode option").each(function () {
+                if ($(this).val() == $("input#campaign_" + id + "_sum_type").val()) {
+                    $(this).prop("selected", true);
+                }
+            });
+            $("select#campaign_" + id + "_age_constraint_mode option").each(function () {
+                if ($(this).val() == $("input#campaign_" + id + "_age_type").val()) {
+                    $(this).prop("selected", true);
+                }
+            });
+            $("select#campaign_" + id + "_car_constraint_mode option").each(function () {
+                if ($(this).val() == $("input#campaign_" + id + "_car_type").val()) {
+                    $(this).prop("selected", true);
+                }
+            });
+            $("input#campaign_" + id + "_sum_constraint_value").val($("input#campaign_" + id +
+                "_sum_val").val());
+            $("input#campaign_" + id + "_age_constraint_value").val($("input#campaign_" + id +
+                "_age_val").val());
+            $("input#campaign_" + id + "_car_constraint_value").val($("input#campaign_" + id +
+                "_car_val").val());
+            if ($("input#campaign_" + id + "_sum_enabled").val() != "") {
+                $("input#campaign_" + id + "_sum_checkbox").prop('checked', true);
+            }
+            if ($("input#campaign_" + id + "_age_enabled").val() != "") {
+                $("input#campaign_" + id + "_age_checkbox").prop('checked', true);
+            }
+            if ($("input#campaign_" + id + "_car_enabled").val() != "") {
+                $("input#campaign_" + id + "_car_checkbox").prop('checked', true);
+            }
+        });
+        // remove tab class when changing sections
+        $("h3.ui-accordion-header").on('click', function () {
+            $('#tab-content div').removeClass('is-active');
+            $("div#tab-content").css('display', 'none');
+        });
+        // clear value field on type change
+        $("select.discount_select").on('change', function () {
+            $(this).parent().parent().children().find("input").val('');
+        });
+        // add percentage guard
+        $("input.discount_val").on('change', function () {
+            var select = $(this).parent().siblings().find("select.discount_select").val();
+            if (select == "percent") {
+                if ($(this).val() > 100) {
+                    alert(
+                        "Invalid percentage. Please choose a percentage between 0 and 100 or change the type.");
+                    $(this).val(0);
+                }
+            }
+        });
+
+
+        // event handlers for new campaign
+        var newCampaign = 0;
+        $('#newCampaignBtn').click(function () {
+            $('#newCampaignModal').toggleClass('is-active');
+        });
+        $("button#submitCampaignInfo").click(function () {
+            var name = $("input#nameNewCampaign").val();
+            var start = $("input#startNewCampaign").val();
+            var end = $("input#endNewCampaign").val();
+            if (name.length > 0 && start.length > 0 && end.length > 0) {
+                var url = "{{url_for('campaign.index',_external=True, _scheme='https')}}" + "?name=" +
+                    name + "&start=" + start + "&end=" + end;
+                $.post(url).done(function (response) {
+                    console.log(response);
+                    newCampaign = response['id']
+                    console.log("campaign details submitted:" + name, start, end);
+                    $("div#campaignInfo").css('display', 'none');
+                    $("div#campaignDiscount").css('display', 'block');
+                }).fail(function (response) {
+                    console.log(response)
+                });
+            } else {
+                alert("invalid value");
+            }
+        });
+        $("button#submitCampaignDiscount").click(function () {
+            var type = $("select#newCampaignDiscountType").val();
+            var value = $("input#newCampaignDiscountValue").val();
+            if (value > 0 && newCampaign > 0) {
+                create_campaign_discount(newCampaign, type, value);
+            } else {
+                alert("invalid value");
+            }
+        });
+
+
+
+        $("button#submitCampaignConstraints").click(function () {
+            var sum_constr = $("input#campaign_new_sum_checkbox").is(":checked");
+            var age_constr = $("input#campaign_new_age_checkbox").is(":checked");
+            var car_constr = $("input#campaign_new_car_checkbox").is(":checked");
+            if (sum_constr) {
+                var sum_constr_type = $("select#campaign_new_sum_constraint_mode").val();
+                var sum_constr_val = $("input#campaign_new_sum_constraint_value").val();
+                create_sum_constraint(newCampaign, sum_constr_type, sum_constr_val);
+            }
+            if (age_constr) {
+                var age_constr_type = $("select#campaign_new_age_constraint_mode").val();
+                var age_constr_val = $("input#campaign_new_age_constraint_value").val();
+                create_age_constraint(newCampaign, age_constr_type, age_constr_val)
+                console.log(age_constr_type, age_constr_val);
+            }
+            if (car_constr) {
+                var car_constr_type = $("select#campaign_new_car_constraint_mode").val();
+                var car_constr_val = $("input#campaign_new_car_constraint_value").val();
+                create_car_constraint(newCampaign, car_constr_type, car_constr_val)
+                console.log(car_constr_type, car_constr_val);
+            }
+            console.log("campaign constraints submitted.");
+            $("div#campaignConstraints").css('display', 'none');
+            $("div#campaignConfirmation").css('display', 'block');
+        });
+
+        $('#closeModal').click(function () {
+            $('#newCampaignModal').removeClass('is-active');
+            location.reload();
+        });
+
+
+        // event handlers for updates
+        $("button.update-button").on('click', function () {
+            var tab = $(this).data('id');
+            var type = $(this).data('type');
+            console.log(tab, type);
+            if (type == "dates") {
+                console.log("Updating campaign " + tab);
+                var start = $("input#startDP" + tab).val();
+                var end = $("input#endDP" + tab).val();
+                update_campaign(tab, start, end);
+            } else if (type == "discount") {
+                var disc_id = $("input#campaign_" + tab + "_discount_id").val();
+                var type = $("select#campaign_" + tab + "_discount_type").val();
+                var value = $("input#campaign_" + tab + "_discount_value").val();
+                if (disc_id != '') {
+                    update_campaign_discount(tab, type, value);
+                } else {
+                    create_campaign_discount(tab, type, value);
+                }
+            } else if (type == "constraint") {
+                var sum_constr = $("input#campaign_" + tab + "_sum_checkbox").is(":checked");
+                var sum_constr_id = $("input#campaign_" + tab + "_sum_enabled").val()
+                if (sum_constr) {
+                    var sum_constr_type = $("select#campaign_" + tab + "_sum_constraint_mode").val();
+                    var sum_constr_val = $("input#campaign_" + tab + "_sum_constraint_value").val();
+                    if (sum_constr_val != '') {
+                        if (sum_constr_id != '') {
+                            console.log("Updating constraint " + sum_constr_id);
+                            update_constraint(sum_constr_id, sum_constr_type, sum_constr_val);
+                        } else {
+                            create_sum_constraint(tab, sum_constr_type, sum_constr_val);
+                        }
+                    } else {
+                        alert('Please insert a value');
+                    }
+                } else if (sum_constr_id != '') {
+                    console.log("Removing constraint " + sum_constr_id);
+                    remove_constraint(sum_constr_id)
+                }
+                var age_constr = $("input#campaign_" + tab + "_age_checkbox").is(":checked");
+                var age_constr_id = $("input#campaign_" + tab + "_age_enabled").val()
+                if (age_constr) {
+                    var age_constr_type = $("select#campaign_" + tab + "_age_constraint_mode").val();
+                    var age_constr_val = $("input#campaign_" + tab + "_age_constraint_value").val();
+                    if (age_constr_val != '') {
+                        if (age_constr_id != '') {
+                            console.log("Updating constraint " + age_constr_id);
+                            update_constraint(age_constr_id, age_constr_type, age_constr_val);
+                        } else {
+                            create_age_constraint(tab, age_constr_type, age_constr_val);
+                        }
+                    } else {
+                        alert('Please insert a value');
+                    }
+                } else if (age_constr_id != '') {
+                    console.log("Removing constraint " + age_constr_id);
+                    remove_constraint(age_constr_id)
+                }
+                var car_constr = $("input#campaign_" + tab + "_car_checkbox").is(":checked");
+                var car_constr_id = $("input#campaign_" + tab + "_car_enabled").val()
+                if (car_constr) {
+                    var car_constr_type = $("select#campaign_" + tab + "_car_constraint_mode").val();
+                    var car_constr_val = $("input#campaign_" + tab + "_car_constraint_value").val();
+                    if (car_constr_val != '') {
+                        if (car_constr_id != '') {
+                            console.log("Updating constraint " + car_constr_id);
+                            update_constraint(car_constr_id, car_constr_type, car_constr_val);
+                        } else {
+                            create_car_constraint(tab, car_constr_type, car_constr_val);
+                        }
+                    } else {
+                        alert('Please insert a value');
+                    }
+                } else if (car_constr_id != '') {
+                    console.log("Removing constraint " + car_constr_id);
+                    remove_constraint(car_constr_id)
+                }
+            }
+        });
+
+        // voucher buttons functionality
+        $("button.add-voucher").on('click', function () {
+            let id = $(this).data('campaign');
+            add_new_campaign_voucher(id);
+        });
+        $("button.send-voucher").on('click', function () {
+            var voucherId = $(this).closest("tr").find("td#voucherId").first().text();
+            let email = prompt('Add the email address to which you want to send this voucher.');
+            if (email != '') {
+                let conf = confirm('Are you sure you want to send this voucher to: ' + email + "?");
+                if (conf) {
+                    console.log("sending voucher " + voucherId + " to " + email);
+                }
+            }
+        });
+
+        $("button.refresh-voucher").on('click', function () {
+            var voucherId = $(this).closest("tr").find("td#voucherId").first().text();
+            var addBtn = $(this).closest("div.columns").siblings().find("button.add-voucher");
+            let end = $(addBtn).data('exp');
+            let new_end = prompt(
+                "Add the new expiry date (yyyy-mm-dd) you want to assign to this voucher. Leave blank to us the campaign's expiry date"
+                );
+            if (new_end != '') {
+                let new_end_date = new Date(new_end);
+                let campaign_end = new Date(end)
+                if (new_end_date < campaign_end) {
+                    end = new_end;
+                } else {
+                    let new_end = prompt(
+                        "The date entered is after the campaign end date. Please add a date before " +
+                        end + " to continue.");
+                    end = new_end;
+                }
+                if (new_end != '') {
+                    console.log("refresh voucher " + voucherId, end);
+                    update_voucher(voucherId, "True", new_end, "False")
+                }
+            }
+        });
+        $("button.expire-voucher").on('click', function () {
+            var voucherId = $(this).closest("tr").find("td#voucherId").first().text();
+            console.log("expire voucher " + voucherId);
+            update_voucher(voucherId, "False", new Date().toISOString().slice(0, 10), "False")
+        });
+    });
+</script>
+{% endblock %}

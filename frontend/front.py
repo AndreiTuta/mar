@@ -34,9 +34,13 @@ def calendarpage():
     else:
        return redirect(url_for("frontend.loginpage"))
 
+@frontend_blueprint.route('/confirmation')
+def confirmationpage():    
+    return render_template("confirmation.html")
+
 @frontend_blueprint.route('/gallery')
 def gallerypage():
-    return render_template("gallery.html")
+    return render_template("gallery.html", images = [x for x in range(10)])
 
 @frontend_blueprint.route("/logout")
 def logoutpage():

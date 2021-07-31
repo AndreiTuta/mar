@@ -1,0 +1,20 @@
+
+#tab-content section {
+    display: none;
+}
+
+#tab-content section.is-active {
+    display: block;
+    height: 200px;
+  }
+
+#voucherTable{
+    width: 100%;table-layout:fixed;
+}
+#voucherTable td{
+  width: 220px;
+  display: table-cell;
+}
+#voucherTable td:first-child{
+  width: 10px !important;
+}

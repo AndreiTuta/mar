@@ -3,7 +3,6 @@ env
 # api cache
 api/__pycache__
 # frontend
-frontend/dist
 frontend/__pycache__
 # db
 data/data.db
