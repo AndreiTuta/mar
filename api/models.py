@@ -80,3 +80,18 @@ class Booking(db.Model, ModelClass):
         format = "%Y-%m-%dT%H:%M:%S.000Z"
         dt_object = datetime.datetime.strptime(date, format)
         self.date = dt_object
+
+
+class Album(db.Model, ModelClass):
+    __tablename__ = "album"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    date = db.Column(db.DateTime, nullable=False)
+    private = db.Column(db.Boolean)
+    
+    def __init__(self, name, private):
+        self.name = name
+        dt_object = datetime.datetime.now()
+        self.date = dt_object
+        self.private = private
