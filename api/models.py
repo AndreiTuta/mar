@@ -6,6 +6,7 @@ import datetime
 
 db = SQLAlchemy()
 
+format = "%Y-%m-%dT%H:%M:%S.000Z"
 
 class ModelClass():
     def as_dict(self):
@@ -77,7 +78,6 @@ class Booking(db.Model, ModelClass):
 
     def __init__(self, customer: int, date: str):
         self.customer = customer
-        format = "%Y-%m-%dT%H:%M:%S.000Z"
         dt_object = datetime.datetime.strptime(date, format)
         self.date = dt_object
 
@@ -87,11 +87,25 @@ class Album(db.Model, ModelClass):
     
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
-    date = db.Column(db.DateTime, nullable=False)
+    date = db.Column(db.String, nullable=False)
     private = db.Column(db.Boolean)
     
     def __init__(self, name, private):
         self.name = name
         dt_object = datetime.datetime.now()
-        self.date = dt_object
+        self.date = datetime.date.strftime(dt_object, format)
         self.private = private
+    
+    def update(self, name, date, private):
+        if name != '':
+            print(f"Updating {self.id} name {self.name} to {name}")
+            self.name = name
+        if date != '':
+            print(
+                f"Updating {self.id} date {self.date} to {date}")
+            self.date = date
+        if private is not None:
+            print(f"Updating {self.id} private {self.private} to {private}")
+            self.private = private
+        db.session.flush()
+        db.session.commit()
