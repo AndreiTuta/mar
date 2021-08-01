@@ -34,4 +34,4 @@ def fetch_bookings_in_period():
         for booking in b:
             results[booking.id] = booking.as_dict()
         return results
-    return "", 404
+    return ""
