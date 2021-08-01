@@ -4,6 +4,7 @@ from api.models import db, Customer
 from api.customer import customer_blueprint
 from api.booking import booking_blueprint
 from api.album import album_blueprint
+from api.image import image_blueprint
 from frontend.front import frontend_blueprint
 
 from flask_cors import CORS, cross_origin
@@ -31,6 +32,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 app.register_blueprint(customer_blueprint, url_prefix="/customer")
 app.register_blueprint(booking_blueprint, url_prefix="/booking")
 app.register_blueprint(album_blueprint, url_prefix="/album")
+app.register_blueprint(image_blueprint, url_prefix="/image")
 
 app.register_blueprint(frontend_blueprint, url_prefix="/")
 

@@ -109,3 +109,35 @@ class Album(db.Model, ModelClass):
             self.private = private
         db.session.flush()
         db.session.commit()
+
+class Image(db.Model, ModelClass):
+    __tablename__ = "image"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String, nullable=False)
+    link = db.Column(db.String, nullable=False)
+    album = db.Column(db.Integer, nullable = False)
+    desc = db.Column(db.String, nullable=False)
+    uploaded = db.Column(db.String, nullable=False)
+    
+    def __init__(self, link, album, desc):
+        dt_object = datetime.datetime.now()
+        self.link = link
+        self.album = album
+        self.desc = desc
+        self.code = str(uuid.uuid4())
+        self.uploaded = datetime.date.strftime(dt_object, format)
+    
+    def update(self, link, album, desc):
+        if link is not None and link != '':
+            print(f"Updating {self.id} link {self.link} to {link}")
+            self.link = link
+        if album  is not None and album != '':
+            print(
+                f"Updating {self.id} date {self.album} to {album}")
+            self.album = album
+        if desc  is not None and desc!= '':
+            print(f"Updating {self.id} desc {self.desc} to {desc}")
+            self.desc = desc
+        db.session.flush()
+        db.session.commit()
