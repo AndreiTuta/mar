@@ -3,6 +3,7 @@ from flask_login import login_user, current_user, logout_user, login_required
 
 from frontend.forms import LoginForm
 from api.models import Customer
+from api.handler import *
 frontend_blueprint = Blueprint("frontend", __name__)
 
 @frontend_blueprint.route('/')
@@ -40,7 +41,13 @@ def confirmationpage():
 
 @frontend_blueprint.route('/gallery')
 def gallerypage():
-    return render_template("gallery.html", images = [x for x in range(10)])
+    albums = get_albums()
+    return render_template("gallery.html", albums = albums)
+
+@frontend_blueprint.route('/gallery/albums/<album_id>')
+def gallery_album_page(album_id:int):
+    album = get_album(album_id)
+    return render_template("album.html", album = album)
 
 @frontend_blueprint.route("/logout")
 def logoutpage():
