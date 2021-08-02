@@ -5,4 +5,4 @@ api/__pycache__
 # frontend
 frontend/__pycache__
 # db
-data/data.db
+# data/data.db
