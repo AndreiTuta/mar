@@ -52,8 +52,7 @@ def internal_error(error):
 def page_not_found(e):
     return e
 
+db.init_app(app)
 
 if __name__ == "__main__":
-    # db init only after the app started
-    db.init_app(app)
     app.run(debug=True, port=8080)
