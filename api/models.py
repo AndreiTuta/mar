@@ -8,6 +8,7 @@ db = SQLAlchemy()
 
 format = "%Y-%m-%dT%H:%M:%S.000Z"
 
+
 class ModelClass():
     def as_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
@@ -57,7 +58,7 @@ class Customer(db.Model, ModelClass, UserMixin):
             self.email = email
         db.session.flush()
         db.session.commit()
-        
+
     def get_id(self):
         try:
             return self.id
@@ -66,7 +67,6 @@ class Customer(db.Model, ModelClass, UserMixin):
 
     def __repr__(self):
         return "User(%s , %s)" % (self.uname, self.email)
-
 
 
 class Booking(db.Model, ModelClass):
@@ -84,18 +84,20 @@ class Booking(db.Model, ModelClass):
 
 class Album(db.Model, ModelClass):
     __tablename__ = "album"
-    
+
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     date = db.Column(db.String, nullable=False)
     private = db.Column(db.Boolean)
-    
+    # populated in handler
+    images = []
+
     def __init__(self, name, private):
         self.name = name
         dt_object = datetime.datetime.now()
         self.date = datetime.date.strftime(dt_object, format)
         self.private = private
-    
+
     def update(self, name, date, private):
         if name != '':
             print(f"Updating {self.id} name {self.name} to {name}")
@@ -110,16 +112,22 @@ class Album(db.Model, ModelClass):
         db.session.flush()
         db.session.commit()
 
+    def as_dict(self):
+        dicti = {c.name: getattr(self, c.name) for c in self.__table__.columns}
+        dicti["images"] = self.images
+        return dicti
+
+
 class Image(db.Model, ModelClass):
     __tablename__ = "image"
-    
+
     id = db.Column(db.Integer, primary_key=True)
     code = db.Column(db.String, nullable=False)
     link = db.Column(db.String, nullable=False)
-    album = db.Column(db.Integer, nullable = False)
+    album = db.Column(db.Integer, nullable=False)
     desc = db.Column(db.String, nullable=False)
     uploaded = db.Column(db.String, nullable=False)
-    
+
     def __init__(self, link, album, desc):
         dt_object = datetime.datetime.now()
         self.link = link
@@ -127,16 +135,16 @@ class Image(db.Model, ModelClass):
         self.desc = desc
         self.code = str(uuid.uuid4())
         self.uploaded = datetime.date.strftime(dt_object, format)
-    
+
     def update(self, link, album, desc):
         if link is not None and link != '':
             print(f"Updating {self.id} link {self.link} to {link}")
             self.link = link
-        if album  is not None and album != '':
+        if album is not None and album != '':
             print(
                 f"Updating {self.id} date {self.album} to {album}")
             self.album = album
-        if desc  is not None and desc!= '':
+        if desc is not None and desc != '':
             print(f"Updating {self.id} desc {self.desc} to {desc}")
             self.desc = desc
         db.session.flush()
