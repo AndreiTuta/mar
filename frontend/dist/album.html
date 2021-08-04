@@ -1,3 +1,139 @@
 {% extends 'index.html' %} {%block body%}
-{{album}}
+
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .header {
+        text-align: center;
+        padding: 32px;
+    }
+
+    .row {
+        display: -ms-flexbox;
+        /* IE 10 */
+        display: flex;
+        -ms-flex-wrap: wrap;
+        /* IE 10 */
+        flex-wrap: wrap;
+        padding: 0 4px;
+    }
+
+    /* Create two equal columns that sits next to each other */
+    .column {
+        -ms-flex: 50%;
+        /* IE 10 */
+        flex: 50%;
+        padding: 0 4px;
+    }
+
+    .column img {
+        margin-top: 8px;
+        vertical-align: middle;
+    }
+
+    /* Style the buttons */
+    .btn {
+        border: none;
+        outline: none;
+        padding: 10px 16px;
+        background-color: #f1f1f1;
+        cursor: pointer;
+        font-size: 18px;
+    }
+
+    .btn:hover {
+        background-color: #ddd;
+    }
+
+    .btn.active {
+        background-color: #666;
+        color: white;
+    }
+</style>
+{% macro render_row(list)%}
+{%for item in list%}
+{%if item%}
+<img src="{{item.link}}" style="width:100%">
+{% endif%}
+{% endfor %}
+<hr>
+{% endmacro%}
+
+{%if album.images|length > 0%}
+
+<!-- Header -->
+<div class="header" id="myHeader">
+    <button class="btn" onclick="one()">1</button>
+    {%if album.images|length > 8%}
+    <button class="btn active" onclick="two()">2</button>
+    {% endif%}
+    {%if album.images|length > 12%}
+    <button class="btn" onclick="four()">4</button>
+    {% endif %}
+</div>
+
+<!-- Photo Grid -->
+<div class="row">
+    {%for image in album.images %}
+    {% if loop.index %4 ==1 %}
+    <div class="column">
+        {{render_row((album.images[loop.index0],album.images[loop.index0+1],album.images[loop.index0+2],album.images[loop.index0+3]))}}
+    </div>
+    {%endif%}
+    {% endfor %}
+</div>
+
+{% else %}
+<p>No images are present in this album</p>
+{% endif%}
+<script>
+    // Get the elements with class="column"
+    var elements = document.getElementsByClassName("column");
+
+    // Declare a loop variable
+    var i;
+
+    // Full-width images
+    function one() {
+        for (i = 0; i < elements.length; i++) {
+            elements[i].style.msFlex = "100%"; // IE10
+            elements[i].style.flex = "100%";
+        }
+    }
+
+    // Two images side by side
+    function two() {
+        for (i = 0; i < elements.length; i++) {
+            elements[i].style.msFlex = "50%"; // IE10
+            elements[i].style.flex = "50%";
+        }
+    }
+
+    // Four images side by side
+    function four() {
+        for (i = 0; i < elements.length; i++) {
+            elements[i].style.msFlex = "25%"; // IE10
+            elements[i].style.flex = "25%";
+        }
+    }
+
+    // Add active class to the current button (highlight it)
+    var header = document.getElementById("myHeader");
+    var btns = header.getElementsByClassName("btn");
+    for (var i = 0; i < btns.length; i++) {
+        btns[i].addEventListener("click", function () {
+            var current = document.getElementsByClassName("active");
+            current[0].className = current[0].className.replace(" active", "");
+            this.className += " active";
+        });
+    }
+</script>
 {%endblock%}
