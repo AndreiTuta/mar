@@ -27,6 +27,27 @@ def loginpage():
             return redirect(url_for("frontend.loginpage"))
     return render_template("login.html", form=form)
 
+@frontend_blueprint.route('/about')
+def aboutpage():    
+    return render_template("about.html")
+
+@frontend_blueprint.route('/services')
+def servicespage():    
+    return render_template("services.html")
+
+@frontend_blueprint.route('/contact')
+def contactpage():    
+    return render_template("contact.html")
+
+@frontend_blueprint.route('/gallery')
+def gallerypage():
+    albums = get_albums()
+    return render_template("gallery.html", albums = albums)
+
+@frontend_blueprint.route('/gallery/albums/<album_id>')
+def gallery_album_page(album_id:int):
+    album = get_album(album_id)
+    return render_template("album.html", album = album)
 
 @frontend_blueprint.route('/calendar')
 def calendarpage():
@@ -38,16 +59,6 @@ def calendarpage():
 @frontend_blueprint.route('/confirmation')
 def confirmationpage():    
     return render_template("confirmation.html")
-
-@frontend_blueprint.route('/gallery')
-def gallerypage():
-    albums = get_albums()
-    return render_template("gallery.html", albums = albums)
-
-@frontend_blueprint.route('/gallery/albums/<album_id>')
-def gallery_album_page(album_id:int):
-    album = get_album(album_id)
-    return render_template("album.html", album = album)
 
 @frontend_blueprint.route("/logout")
 def logoutpage():
