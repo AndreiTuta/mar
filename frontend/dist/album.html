@@ -61,7 +61,7 @@
 {% macro render_row(list)%}
 {%for item in list%}
 {%if item%}
-<img src="{{item.link}}" style="width:100%">
+<img class="grid-image" src="{{item.link}}" style="width:100%">
 {% endif%}
 {% endfor %}
 <hr>
@@ -91,6 +91,16 @@
     {% endfor %}
 </div>
 
+<div class="modal" id="image-modal">
+    <div class="modal-background"></div>
+    <div class="modal-content slider">
+        {% for image in album.images%}
+        <img class="image" src="{{image.link}}" alt="Placeholder image">
+        {% endfor%}
+        </>
+    </div>
+    <button id="close-modal" class="modal-close is-large" aria-label="close"></button>
+</div>
 {% else %}
 <p>No images are present in this album</p>
 {% endif%}
@@ -135,5 +145,20 @@
             this.className += " active";
         });
     }
+</script>
+<script>
+    $("img.grid-image").on('click', function () {
+        $("div#image-modal").addClass("is-active");
+    });
+    $("button#close-modal").on('click', function () {
+        $("div#image-modal").removeClass("is-active");
+    });
+</script>
+<script>
+    $(".slider").slick({
+        dots: false,
+        speed: 100,
+        arrows: true,
+    });
 </script>
 {%endblock%}
