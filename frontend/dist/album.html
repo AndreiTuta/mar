@@ -63,8 +63,18 @@
 <a href="{{image.link}}" class="big"><img src="{{image.link}}" alt="" title="" /></a>
 {% endif%}
 {% endfor %}
-<hr>
 {% endmacro%}
+
+<section class="hero is-medium" style="background-image: url({{album.header}})">
+    <div class="hero-body">
+        <p class="title white-text">
+            {{album.name}}
+        </p>
+        <p class="subtitle">
+            {{album.date}}
+        </p>
+    </div>
+</section>
 
 {%if album.images|length > 0%}
 <!-- Header -->

@@ -88,6 +88,8 @@ class Album(db.Model, ModelClass):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     date = db.Column(db.String, nullable=False)
+    logo = db.Column(db.String, nullable=False)
+    header = db.Column(db.String, nullable=False)
     private = db.Column(db.Boolean)
     # populated in handler
     images = []
