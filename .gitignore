@@ -6,3 +6,4 @@ api/__pycache__
 frontend/__pycache__
 # db
 # data/data.db
+.vscode/settings.json

@@ -1,6 +1,5 @@
 {% extends 'index.html' %} {%block body%}
 
-
 <style>
     * {
         box-sizing: border-box;
@@ -59,16 +58,15 @@
     }
 </style>
 {% macro render_row(list)%}
-{%for item in list%}
-{%if item%}
-<img class="grid-image" src="{{item.link}}" style="width:100%">
+{%for image in list%}
+{%if image%}
+<a href="{{image.link}}" class="big"><img src="{{image.link}}" alt="" title="" /></a>
 {% endif%}
 {% endfor %}
 <hr>
 {% endmacro%}
 
 {%if album.images|length > 0%}
-
 <!-- Header -->
 <div class="header" id="myHeader">
     <button class="btn" onclick="one()">1</button>
@@ -81,7 +79,7 @@
 </div>
 
 <!-- Photo Grid -->
-<div class="row">
+<div class="row gallery">
     {%for image in album.images %}
     {% if loop.index %4 ==1 %}
     <div class="column">
@@ -89,18 +87,10 @@
     </div>
     {%endif%}
     {% endfor %}
+
+    <div class="clear"></div>
 </div>
 
-<div class="modal" id="image-modal">
-    <div class="modal-background"></div>
-    <div class="modal-content slider">
-        {% for image in album.images%}
-        <img class="image" src="{{image.link}}" alt="Placeholder image">
-        {% endfor%}
-        </>
-    </div>
-    <button id="close-modal" class="modal-close is-large" aria-label="close"></button>
-</div>
 {% else %}
 <p>No images are present in this album</p>
 {% endif%}
@@ -147,18 +137,8 @@
     }
 </script>
 <script>
-    $("img.grid-image").on('click', function () {
-        $("div#image-modal").addClass("is-active");
-    });
-    $("button#close-modal").on('click', function () {
-        $("div#image-modal").removeClass("is-active");
-    });
-</script>
-<script>
-    $(".slider").slick({
-        dots: false,
-        speed: 100,
-        arrows: true,
-    });
+    (function () {
+        var $gallery = new SimpleLightbox('.gallery a', {});
+    })();
 </script>
 {%endblock%}
