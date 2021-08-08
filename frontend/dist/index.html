@@ -28,7 +28,11 @@
 <body style="background: beige; min-height: 100vh">
     {% include "includes/_navbar.html" %}
     <div class="container-fluid" style="padding-top:100px;">
-        {% include "includes/_notifs.html" %}
+        <center>
+            <div class="column is-4">
+                {% include "includes/_notifs.html" %}
+            </div>
+        </center>
         {% block body %} {% endblock %}
     </div>
 </body>

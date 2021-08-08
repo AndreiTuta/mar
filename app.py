@@ -23,8 +23,8 @@ cors = CORS(app)
 app.secret_key = 'xxxxyyyyyzzzzz'
 pwd = Bcrypt(app)
 login_manager = LoginManager(app)
-login_manager.login_view = "admin.loginpage"
-login_manager.login_message = "You are mot authorised to access this page. Please login first."
+login_manager.login_view = "frontend.loginpage"
+login_manager.login_message = "You are not authorised to access this page. Please login first."
 login_manager.login_message_category = "danger"
 
 app.config['CORS_HEADERS'] = 'Content-Type'

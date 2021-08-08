@@ -39,6 +39,11 @@ def servicespage():
 def contactpage():    
     return render_template("contact.html")
 
+@frontend_blueprint.route('/admin')
+@login_required
+def adminpage():    
+    return render_template("admin.html")
+
 @frontend_blueprint.route('/gallery')
 def gallerypage():
     albums = get_albums()
